@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pour Decisions | Alcohol Consumption Estimator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='infographic.css') }}">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">POUR<span>·</span>DECISIONS</a><span class="top-note">A DATA STORY · WORLDWIDE</span></header>
+  <main>
+    <section class="hero">
+      <div class="hero-copy"><p class="eyebrow">THE WORLD IN A GLASS</p><h1>What does a country's<br><em>drinking story</em> look like?</h1><p class="intro">Explore the relationship between beer, spirits and wine servings and the total pure alcohol consumed. Set a country profile and let our model estimate.</p><a class="text-link" href="#estimator">MAKE AN ESTIMATE <span>↓</span></a></div>
+      <div class="hero-art" aria-label="Abstract bar chart illustration"><div class="sun"></div><div class="glass glass-one"><i></i></div><div class="glass glass-two"><i></i></div><div class="glass glass-three"><i></i></div><div class="art-label">192 COUNTRIES<br>5 CONTINENTS</div><span class="spark s1">✳</span><span class="spark s2">✳</span></div>
+    </section>
+
+    <section class="stats" aria-label="Dataset overview"><div><span class="stat-number">{{ summary.countries }}</span><span class="stat-label">COUNTRIES</span></div><div><span class="stat-number">{{ summary.continents }}</span><span class="stat-label">CONTINENTS</span></div><div><span class="stat-number">{{ '%.1f'|format(summary.average_alcohol) }}<small> L</small></span><span class="stat-label">AVG. PURE ALCOHOL</span></div><div><span class="stat-number">{{ '%.0f'|format(summary.average_beer) }}</span><span class="stat-label">AVG. BEER SERVINGS</span></div></section>
+
+    <section class="charts"><div class="section-heading"><div><p class="eyebrow">THE BIG PICTURE</p><h2>Consumption, at a glance</h2></div><p>Computed directly from the assignment dataset.<br>Countries with missing target values are excluded.</p></div><div class="chart-grid"><article class="chart-card"><h3>Pure alcohol by continent</h3><p class="chart-subtitle">Average litres per person</p><div class="bars">{% set max_value = chart_stats.values()|max %}{% for name, value in chart_stats.items() %}<div class="bar-row"><span>{{ name }}</span><div class="bar-track"><i style="width:{{ (value / max_value * 100)|round|int }}%"></i></div><b>{{ '%.1f'|format(value) }} L</b></div>{% endfor %}</div><p class="chart-foot">Source: Beer Servings dataset supplied with this assignment</p></article><article class="chart-card"><h3>The dataset, in two views</h3><p class="chart-subtitle">Continent averages and target distribution</p><img class="overview-chart" src="{{ url_for('static', filename='dataset_overview.png') }}" alt="Bar chart of average pure alcohol by continent and histogram of the target distribution"><p class="chart-foot">Source: Beer Servings dataset supplied with this assignment</p></article></div></section>
+
+    <section class="estimator" id="estimator"><div class="form-intro"><p class="eyebrow">YOUR TURN</p><h2>Build a country<br><em>profile</em></h2><p>Enter three serving counts and select the country and continent. The model estimates litres of pure alcohol per person.</p><div class="model-tag"><span></span> REGRESSION MODEL · R² SELECTED</div></div><form method="post" class="form-card"><div class="form-top"><span>01 — YOUR INPUTS</span><span>ALL FIELDS REQUIRED</span></div>
+      {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+      <label for="country">COUNTRY</label><select name="country" id="country" required>{% for country in countries %}<option value="{{ country }}" {% if values.country == country %}selected{% endif %}>{{ country }}</option>{% endfor %}</select>
+      <div class="input-row"><div><label for="beer_servings">BEER SERVINGS</label><input type="number" id="beer_servings" name="beer_servings" min="0" max="1000" value="{{ values.beer_servings }}" required></div><div><label for="spirit_servings">SPIRIT SERVINGS</label><input type="number" id="spirit_servings" name="spirit_servings" min="0" max="1000" value="{{ values.spirit_servings }}" required></div><div><label for="wine_servings">WINE SERVINGS</label><input type="number" id="wine_servings" name="wine_servings" min="0" max="1000" value="{{ values.wine_servings }}" required></div></div>
+      <label for="continent">CONTINENT</label><select name="continent" id="continent" required>{% for continent in continents %}<option value="{{ continent }}" {% if values.continent == continent %}selected{% endif %}>{{ continent }}</option>{% endfor %}</select>
+      <button type="submit">ESTIMATE PURE ALCOHOL <span>↗</span></button>
+      {% if prediction is not none %}<div class="result" role="status"><div><span class="result-label">ESTIMATED PURE ALCOHOL</span><strong>{{ '%.2f'|format(prediction) }} <small>litres</small></strong><span class="result-note">Model estimate per person based on the selected profile.</span></div><div class="result-mark">≈</div></div>{% endif %}
+      <p class="disclaimer">An estimate from a machine learning model, not a clinical measure.</p></form></section>
+  </main>
+  <footer><a class="brand" href="/">POUR<span>·</span>DECISIONS</a><p>BEER SERVINGS DATASET · REGRESSION STUDY</p><a href="#">BACK TO TOP ↑</a></footer>
+</body>
+</html>
